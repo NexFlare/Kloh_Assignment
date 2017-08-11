@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_CODE);
         }
         else
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void isLocationEnabled() {
+        Log.d("TAGGER", "isLocationEnabled: ");
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(request);
         PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // All location settings are satisfied. The client can
                         // initialize location
                         // requests here.
+                        getUpdatedLocation();
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied. But could be
@@ -102,28 +104,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Log.d("TAGGER", "onConnected: ");
 
         request = LocationRequest.create()
                 .setInterval(120000)
                 .setFastestInterval(600000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        getUpdatedLocation();
+    }
+
+    private void getUpdatedLocation() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+            return;
         }
-        else {
-            isLocationEnabled();
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, request, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    latitude=location.getLatitude();
-                    longitude=location.getLongitude();
-                    Toast.makeText(MainActivity.this, String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(MainActivity.this, String.valueOf(location.getLongitude()), Toast.LENGTH_SHORT).show();
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, request, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                latitude=location.getLatitude();
+                longitude=location.getLongitude();
+                Toast.makeText(MainActivity.this, String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, String.valueOf(location.getLongitude()), Toast.LENGTH_SHORT).show();
 
-                }
-            });
-        }
+            }
+        });
     }
 
     @Override
@@ -139,9 +143,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.d("TAGGER", "onRequestPermissionsResult: ");
         if(requestCode==REQUEST_CODE){
+
             if(grantResults[0]==PackageManager.PERMISSION_GRANTED){
+
                 Log.d("TAGGER", "onRequestPermissionsResult: ");
                 isLocationEnabled();
             }
@@ -167,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         break;
                     }
                     default: {
+                        getUpdatedLocation();
                         break;
                     }
                 }
