@@ -26,13 +26,23 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.nexflare.kloh.API.KlohAPI;
+import com.nexflare.kloh.Model.LocationModel;
+import com.nexflare.kloh.Model.PostRequest;
+import com.nexflare.kloh.Model.ResponseAPI;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final int REQUEST_CODE = 28201;
     private static final int REQUEST_LOCATION = 28099;
-    Double latitude,longitude;
+    Double latitude=null,longitude=null;
     GoogleApiClient mGoogleApiClient;
     LocationRequest request;
+    Retrofit retrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +54,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .addOnConnectionFailedListener(this)
                 .build();
         checkLocationPermission();
+        retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.kloh.in//kloh/external/v1/activity/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        getAllEvents();
+    }
+
+    private void getAllEvents() {
+        Log.d("TAGGER", "getAllEvents: ");
+        if(latitude!=null&&longitude!=null){
+            Log.d("TAGGER", "getAllEvents: INSIDE");
+            PostRequest postRequest=new PostRequest(new LocationModel(latitude,longitude));
+            Log.d("TAGGER", "getAllEvents: "+postRequest);
+            KlohAPI api=retrofit.create(KlohAPI.class);
+            api.getAllEvents(postRequest).enqueue(new Callback<ResponseAPI>() {
+                @Override
+                public void onResponse(Call<ResponseAPI> call, retrofit2.Response<ResponseAPI> response) {
+                    Log.d("TAGGER", "onResponse: "+response.body());
+                }
+
+                @Override
+                public void onFailure(Call<ResponseAPI> call, Throwable t) {
+                    Log.d("TAGGER", "onFailure: ");
+                    Toast.makeText(MainActivity.this, "Some error occurred", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void checkLocationPermission() {
@@ -56,8 +93,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         else
         {
-            Log.d("TAGGER", "checkLocationPermission: ");
-
+            isLocationEnabled();
         }
     }
 
@@ -123,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onLocationChanged(Location location) {
                 latitude=location.getLatitude();
                 longitude=location.getLongitude();
+                getAllEvents();
                 Toast.makeText(MainActivity.this, String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT).show();
                 Toast.makeText(MainActivity.this, String.valueOf(location.getLongitude()), Toast.LENGTH_SHORT).show();
 
