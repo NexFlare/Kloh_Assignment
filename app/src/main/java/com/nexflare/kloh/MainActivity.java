@@ -29,7 +29,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.nexflare.kloh.API.KlohAPI;
 import com.nexflare.kloh.Model.LocationModel;
 import com.nexflare.kloh.Model.PostRequest;
-import com.nexflare.kloh.Model.ResponseAPI;
+import com.nexflare.kloh.Model.EventResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,17 +65,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.d("TAGGER", "getAllEvents: ");
         if(latitude!=null&&longitude!=null){
             Log.d("TAGGER", "getAllEvents: INSIDE");
-            PostRequest postRequest=new PostRequest(new LocationModel(latitude,longitude));
+            PostRequest postRequest=new PostRequest(new LocationModel(12.926031,77.676246));
             Log.d("TAGGER", "getAllEvents: "+postRequest);
             KlohAPI api=retrofit.create(KlohAPI.class);
-            api.getAllEvents(postRequest).enqueue(new Callback<ResponseAPI>() {
+            api.getAllEvents(postRequest).enqueue(new Callback<EventResponse>() {
                 @Override
-                public void onResponse(Call<ResponseAPI> call, retrofit2.Response<ResponseAPI> response) {
+                public void onResponse(Call<EventResponse> call, retrofit2.Response<EventResponse> response) {
                     Log.d("TAGGER", "onResponse: "+response.body());
                 }
 
                 @Override
-                public void onFailure(Call<ResponseAPI> call, Throwable t) {
+                public void onFailure(Call<EventResponse> call, Throwable t) {
                     Log.d("TAGGER", "onFailure: ");
                     Toast.makeText(MainActivity.this, "Some error occurred", Toast.LENGTH_SHORT).show();
                 }
