@@ -10,6 +10,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/rvEventList"></android.support.v7.widget.RecyclerView>
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/rlError">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="35dp"
+            android:src="@drawable/ic_highlight_off_grey_500_48dp"
+            android:id="@+id/ivError"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Some error occurred"
+            android:id="@+id/tvErrorMessage"
+            android:layout_below="@+id/ivError"/>
+        <info.hoang8f.widget.FButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:text="Refresh"
+            android:textColor="@android:color/white"
+            android:id="@+id/btnRefresh"
+            android:layout_below="@+id/tvErrorMessage"></info.hoang8f.widget.FButton>
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"

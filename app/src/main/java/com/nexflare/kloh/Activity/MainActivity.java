@@ -16,6 +16,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +41,7 @@ import com.nexflare.kloh.Model.PostRequest;
 import com.nexflare.kloh.Model.Result;
 import com.nexflare.kloh.R;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -55,13 +58,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     TextView tvEventAvailable;
     EventListAdapter eventAdapter;
     LocationRequest request;
+    RelativeLayout rlError;
     Retrofit retrofit;
+    Button btnRefresh;
+    int isResultAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("TAGGER", "onCreate: ");
+        isResultAvailable=0;
+        btnRefresh= (Button) findViewById(R.id.btnRefresh);
+        rlError= (RelativeLayout) findViewById(R.id.rlError);
+        rlError.setVisibility(View.INVISIBLE);
         rvEventList= (RecyclerView) findViewById(R.id.rvEventList);
         tvEventAvailable= (TextView) findViewById(R.id.tvEventAvailable);
         tvEventAvailable.setVisibility(View.INVISIBLE);
@@ -94,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 @Override
                 public void onResponse(Call<EventResponse> call, retrofit2.Response<EventResponse> response) {
                     dialog.dismiss();
+                    isResultAvailable=1;
+                    rlError.setVisibility(View.INVISIBLE);
                     int size=response.body().getResponse().getResults().size();
                     Log.d("TAGGER", "onResponse: "+response.body());
                     if(size==0){
@@ -107,7 +119,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 @Override
                 public void onFailure(Call<EventResponse> call, Throwable t) {
                     Log.d("TAGGER", "onFailure: ");
-                    Toast.makeText(MainActivity.this, "Some error occurred", Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                    if(isResultAvailable==0)
+                        rlError.setVisibility(View.VISIBLE);
+                    btnRefresh.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            isLocationEnabled();
+                            getUpdatedLocation();
+                        }
+                    });
+                    if(isInternetAvailable())
+                        Toast.makeText(MainActivity.this, "Some error occurred", Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(MainActivity.this, "Check your Internet Connection", Toast.LENGTH_SHORT).show();
+
                 }
             });
         }
@@ -192,8 +218,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 latitude=location.getLatitude();
                 longitude=location.getLongitude();
                 getAllEvents();
-                Toast.makeText(MainActivity.this, String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT).show();
-                Toast.makeText(MainActivity.this, String.valueOf(location.getLongitude()), Toast.LENGTH_SHORT).show();
+                /*Toast.makeText(MainActivity.this, String.valueOf(location.getLatitude()), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, String.valueOf(location.getLongitude()), Toast.LENGTH_SHORT).show();*/
 
             }
         });
@@ -219,6 +245,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Log.d("TAGGER", "onRequestPermissionsResult: ");
                 isLocationEnabled();
             }
+            else
+                finish();
         }
     }
 
@@ -226,6 +254,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStart() {
         super.onStart();
         Log.d("TAGGER", "onStart: ");
+        tvEventAvailable.setVisibility(View.INVISIBLE);
         mGoogleApiClient.connect();
     }
 
@@ -246,6 +275,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 }
                 break;
+        }
+
+    }
+    public boolean isInternetAvailable() {
+        try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
         }
 
     }

@@ -14,6 +14,7 @@ import com.nexflare.kloh.Model.Result;
 import com.nexflare.kloh.R;
 import com.squareup.picasso.Picasso;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 /**
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventListViewHolder>{
     Context context;
     ArrayList<Result> eventList;
+    public static final int MONTH=1;
+    public static final int DATE=2;
 
     public EventListAdapter(Context context, ArrayList<Result> eventList) {
         this.context = context;
@@ -42,14 +45,17 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         holder.tvEventLocation.setText("@"+ result.getLocation().getName());
         holder.tvEventName.setText(result.getTitle());
         holder.tvEventDescription.setText(result.getSummary());
+        holder.tvEventMonth.setText(result.getActivityTime().getTimeTuples().get(MONTH));
+        holder.tvEventDate.setText(result.getActivityTime().getTimeTuples().get(DATE));
         Picasso.with(context).load(result.getOwnerProfileImageUrl()).into(holder.ivEventLogo);
         Picasso.with(context).load(result.getImageUrl()).fit().into(holder.ivEventPhoto);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(context, EventDetailActivity.class);
-                intent.putExtra("activityId",result.getActivityId());
-                context.startActivity(intent);
+
+                    Intent intent = new Intent(context, EventDetailActivity.class);
+                    intent.putExtra("activityId",result.getActivityId());
+                    context.startActivity(intent);
             }
         });
     }
@@ -64,7 +70,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     }
     class EventListViewHolder extends RecyclerView.ViewHolder{
         ImageView ivEventPhoto,ivEventLogo;
-        TextView tvEventName,tvEventDescription,tvEventLocation;
+        TextView tvEventName,tvEventDescription,tvEventLocation,tvEventDate,tvEventMonth;
         View view;
         public EventListViewHolder(View itemView) {
             super(itemView);
@@ -73,7 +79,19 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             tvEventName=itemView.findViewById(R.id.tvEventName);
             tvEventDescription=itemView.findViewById(R.id.tvEventDescription);
             tvEventLocation=itemView.findViewById(R.id.tvEventLocation);
+            tvEventDate=itemView.findViewById(R.id.tvEventDate);
+            tvEventMonth=itemView.findViewById(R.id.tvEventMonth);
             view=itemView;
         }
+    }
+    public boolean isInternetAvailable() {
+        try {
+            InetAddress ipAddr = InetAddress.getByName("google.com");
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 }
