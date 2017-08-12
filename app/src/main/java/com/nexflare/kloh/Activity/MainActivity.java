@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 @Override
                 public void onResponse(Call<EventResponse> call, retrofit2.Response<EventResponse> response) {
                     dialog.dismiss();
-                    isResultAvailable=1;
                     rlError.setVisibility(View.INVISIBLE);
                     int size=response.body().getResponse().getResults().size();
                     Log.d("TAGGER", "onResponse: "+response.body());
@@ -113,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                     else{
                         eventAdapter.updateArrayList(response.body().getResponse().getResults());
+                        isResultAvailable=1;
                     }
                 }
 
