@@ -1,6 +1,7 @@
 package com.nexflare.kloh.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nexflare.kloh.Activity.EventDetailActivity;
 import com.nexflare.kloh.Model.Result;
 import com.nexflare.kloh.R;
 import com.squareup.picasso.Picasso;
@@ -36,12 +38,20 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     @Override
     public void onBindViewHolder(EventListViewHolder holder, int position) {
-        Result result=eventList.get(position);
+        final Result result=eventList.get(position);
         holder.tvEventLocation.setText("@"+ result.getLocation().getName());
         holder.tvEventName.setText(result.getTitle());
         holder.tvEventDescription.setText(result.getSummary());
         Picasso.with(context).load(result.getOwnerProfileImageUrl()).into(holder.ivEventLogo);
         Picasso.with(context).load(result.getImageUrl()).fit().into(holder.ivEventPhoto);
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(context, EventDetailActivity.class);
+                intent.putExtra("activityId",result.getActivityId());
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -55,6 +65,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     class EventListViewHolder extends RecyclerView.ViewHolder{
         ImageView ivEventPhoto,ivEventLogo;
         TextView tvEventName,tvEventDescription,tvEventLocation;
+        View view;
         public EventListViewHolder(View itemView) {
             super(itemView);
             ivEventPhoto=itemView.findViewById(R.id.ivEventPhoto);
@@ -62,6 +73,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             tvEventName=itemView.findViewById(R.id.tvEventName);
             tvEventDescription=itemView.findViewById(R.id.tvEventDescription);
             tvEventLocation=itemView.findViewById(R.id.tvEventLocation);
+            view=itemView;
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.nexflare.kloh;
+package com.nexflare.kloh.Activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -37,6 +37,7 @@ import com.nexflare.kloh.Model.EventResponse;
 import com.nexflare.kloh.Model.LocationModel;
 import com.nexflare.kloh.Model.PostRequest;
 import com.nexflare.kloh.Model.Result;
+import com.nexflare.kloh.R;
 
 import java.util.ArrayList;
 
