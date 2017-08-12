@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.nexflare.kloh.Model.Result;
 import com.nexflare.kloh.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -36,8 +37,11 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     @Override
     public void onBindViewHolder(EventListViewHolder holder, int position) {
         Result result=eventList.get(position);
-        holder.tvEventLocation.setText(result.getLocation().getName());
+        holder.tvEventLocation.setText("@"+ result.getLocation().getName());
         holder.tvEventName.setText(result.getTitle());
+        holder.tvEventDescription.setText(result.getSummary());
+        Picasso.with(context).load(result.getOwnerProfileImageUrl()).into(holder.ivEventLogo);
+        Picasso.with(context).load(result.getImageUrl()).fit().into(holder.ivEventPhoto);
     }
 
     @Override

@@ -9,7 +9,7 @@ data class Results(val results:ArrayList<Result>)
 
 data class Result(val title:String,val activityId:String,val imageUrl:String,
                   val ownerProfileImageUrl:String,val location:EventLocation,
-                  val activityTime: ActivityTime,val description: String)
+                  val activityTime: ActivityTime,val summary: String)
 
 data class EventLocation(val name:String)
 
