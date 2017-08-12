@@ -2,6 +2,7 @@ package com.nexflare.kloh;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -11,7 +12,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -27,9 +32,13 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.nexflare.kloh.API.KlohAPI;
+import com.nexflare.kloh.Adapter.EventListAdapter;
+import com.nexflare.kloh.Model.EventResponse;
 import com.nexflare.kloh.Model.LocationModel;
 import com.nexflare.kloh.Model.PostRequest;
-import com.nexflare.kloh.Model.EventResponse;
+import com.nexflare.kloh.Model.Result;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int REQUEST_LOCATION = 28099;
     Double latitude=null,longitude=null;
     GoogleApiClient mGoogleApiClient;
+    RecyclerView rvEventList;
+    TextView tvEventAvailable;
+    EventListAdapter eventAdapter;
     LocationRequest request;
     Retrofit retrofit;
 
@@ -48,22 +60,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("TAGGER", "onCreate: ");
+        rvEventList= (RecyclerView) findViewById(R.id.rvEventList);
+        tvEventAvailable= (TextView) findViewById(R.id.tvEventAvailable);
+        tvEventAvailable.setVisibility(View.INVISIBLE);
+        rvEventList.setLayoutManager(new LinearLayoutManager(this));
+        eventAdapter=new EventListAdapter(this,new ArrayList<Result>());
+        rvEventList.setAdapter(eventAdapter);
         mGoogleApiClient = new GoogleApiClient.Builder(this).
                 addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .build();
         checkLocationPermission();
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.kloh.in//kloh/external/v1/activity/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        getAllEvents();
     }
 
     private void getAllEvents() {
         Log.d("TAGGER", "getAllEvents: ");
         if(latitude!=null&&longitude!=null){
+            final ProgressDialog dialog=new ProgressDialog(this,ProgressDialog.STYLE_SPINNER);
+            dialog.setMessage("Getting events near you");
+            dialog.setCancelable(false);
+            dialog.show();
             Log.d("TAGGER", "getAllEvents: INSIDE");
             PostRequest postRequest=new PostRequest(new LocationModel(12.926031,77.676246));
             Log.d("TAGGER", "getAllEvents: "+postRequest);
@@ -71,7 +92,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             api.getAllEvents(postRequest).enqueue(new Callback<EventResponse>() {
                 @Override
                 public void onResponse(Call<EventResponse> call, retrofit2.Response<EventResponse> response) {
+                    dialog.dismiss();
+                    int size=response.body().getResponse().getResults().size();
                     Log.d("TAGGER", "onResponse: "+response.body());
+                    if(size==0){
+                        tvEventAvailable.setVisibility(View.VISIBLE);
+                    }
+                    else{
+                        eventAdapter.updateArrayList(response.body().getResponse().getResults());
+                    }
                 }
 
                 @Override
@@ -113,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // All location settings are satisfied. The client can
                         // initialize location
                         // requests here.
-                        getUpdatedLocation();
+                        //getUpdatedLocation();
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied. But could be
@@ -146,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setInterval(120000)
                 .setFastestInterval(600000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED)
+        isLocationEnabled();
 
         getUpdatedLocation();
     }
