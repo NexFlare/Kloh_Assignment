@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             dialog.setCancelable(false);
             dialog.show();
             Log.d("TAGGER", "getAllEvents: INSIDE");
-            PostRequest postRequest=new PostRequest(new LocationModel(12.926031,77.676246));
+            PostRequest postRequest=new PostRequest(new LocationModel(latitude,longitude));
             Log.d("TAGGER", "getAllEvents: "+postRequest);
             KlohAPI api=retrofit.create(KlohAPI.class);
             api.getAllEvents(postRequest).enqueue(new Callback<EventResponse>() {
